@@ -43,7 +43,7 @@ void main() {
       ColoIaApp(gerenciadorModelo: GerenciadorModelo.inerte()),
     );
 
-    expect(find.text('CitoIlumina'), findsOneWidget);
+    expect(find.text('CitoIllumina'), findsOneWidget);
     expect(find.text('Sou paciente'), findsNothing);
 
     await tester.pump(const Duration(seconds: 3));

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 /// Paleta compartilhada com a plataforma web do projeto.
+/// (os nomes "teal*" são herdados: hoje os valores são o roxo do logotipo do CitoIllumina.)
 class Cores {
   static const porcelana = Color(0xFFF4F7F9);
   static const superficie = Color(0xFFFFFFFF);
   static const tinta = Color(0xFF14232F);
   static const tintaFraca = Color(0xFF4A5C6B);
   static const linha = Color(0xFFDCE5EB);
-  static const teal = Color(0xFF0E6B7B);
-  static const tealProfundo = Color(0xFF0A4D5A);
-  static const tealClaro = Color(0xFFE4F1F3);
+  static const teal = Color(0xFF4C1D95);
+  static const tealProfundo = Color(0xFF2E1065);
+  static const tealClaro = Color(0xFFF3E8FF);
   static const alerta = Color(0xFF8A6410);
   static const alertaFundo = Color(0xFFFFF6E8);
 }

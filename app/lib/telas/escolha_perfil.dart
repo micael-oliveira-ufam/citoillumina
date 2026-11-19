@@ -39,7 +39,7 @@ class TelaEscolhaPerfil extends StatelessWidget {
                           size: 44, color: Colors.white),
                       const SizedBox(height: 12),
                       const Text(
-                        'CitoIlumina',
+                        'CitoIllumina',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 26,

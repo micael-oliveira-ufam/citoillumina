@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Gera o APK do aplicativo CitoIlumina (pacientes e profissionais).
+# Gera o APK do aplicativo CitoIllumina (pacientes e profissionais).
 #
 #   ./build_apk.sh                  APKs por arquitetura (menores, recomendado)
 #   ./build_apk.sh --universal      APK único, roda em qualquer aparelho
@@ -167,7 +167,7 @@ ok "dependências resolvidas"
 
 # Ícone do launcher (Android e iOS) a partir de assets/icone/citoilumina*.png.
 if dart run flutter_launcher_icons >/dev/null 2>&1; then
-  ok "ícones do CitoIlumina gerados"
+  ok "ícones do CitoIllumina gerados"
 else
   aviso "não consegui gerar os ícones (dart run flutter_launcher_icons); o app usará o ícone padrão do Flutter"
 fi

@@ -3,7 +3,7 @@
 <p align="center"><strong>🔗 Acesse a ferramenta: <a href="https://micael-oliveira-ufam.github.io/citoillumina/">micael-oliveira-ufam.github.io/citoillumina</a></strong><br>
 <a href="https://micael-oliveira-ufam.github.io/citoillumina/">Análise de imagens com IA</a> · <a href="https://micael-oliveira-ufam.github.io/citoillumina/catalogo.html">Catálogo de lâminas</a></p>
 
-# CitoIlumina — colo do útero com IA
+# CitoIllumina — colo do útero com IA
 
 Aplicativo Flutter (Android e iOS) que reúne, em um só lugar:
 

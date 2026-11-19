@@ -23,7 +23,7 @@ import re
 import sys
 from pathlib import Path
 
-NOME_EXIBIDO = "CitoIlumina"
+NOME_EXIBIDO = "CitoIllumina"
 
 PERMISSOES_IOS = {
     "NSCameraUsageDescription": (

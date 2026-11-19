@@ -596,8 +596,8 @@ def injetar_css():
   --tinta: #14232F;
   --tinta-fraca: #566B7A;
   --linha: #DCE5EB;
-  --teal: #0E6B7B;
-  --teal-claro: #E4F1F3;
+  --teal: #4C1D95;
+  --teal-claro: #F3E8FF;
 }
 
 .stApp { background: var(--porcelana); }
@@ -1675,7 +1675,7 @@ def secao_validacao():
     ic = METRICAS["ic95"]
     c1, c2, c3, c4 = st.columns(4)
     cartao_numero(c1, "Acurácia global", METRICAS["acuracia"],
-                  nota=f"IC 95%: {ic[0]:.1%} – {ic[1]:.1%}", cor="#0E6B7B")
+                  nota=f"IC 95%: {ic[0]:.1%} – {ic[1]:.1%}", cor="#4C1D95")
     cartao_numero(c2, "F1 macro", METRICAS["f1_macro"])
     cartao_numero(c3, "Precisão macro", METRICAS["precisao_macro"])
     cartao_numero(c4, "Recall macro", METRICAS["recall_macro"])

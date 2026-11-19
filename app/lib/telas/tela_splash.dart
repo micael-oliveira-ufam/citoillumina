@@ -101,7 +101,7 @@ class _TelaSplashState extends State<TelaSplash>
                       ),
                       const SizedBox(height: 28),
                       const Text(
-                        'CitoIlumina',
+                        'CitoIllumina',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 36,

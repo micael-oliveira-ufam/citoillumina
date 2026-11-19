@@ -38,7 +38,7 @@ def cabecalho():
   <div class="cab-linha">
     <a class="cab-logo cab-logo--plataforma" href="index.html" aria-label="CitoIllumina: início"><img src="img/citoilumina.svg" alt="" width="86" height="86"></a>
     <div class="cab-titulo">
-      <div class="sobrancelha">UFAM · IComp · SEMSA Manaus</div>
+      <div class="sobrancelha">CitoIllumina · UFAM · IComp · SEMSA Manaus</div>
       <h1>Sistema de Apoio ao Diagnóstico Citológico</h1>
       <p class="subtitulo">Citologia em meio líquido classificada pelo Sistema Bethesda, com ConvNeXt Large e mapa de atenção Grad-CAM.</p>
     </div>
@@ -89,7 +89,7 @@ def rodape():
     Faculdade de Ciências Farmacêuticas e Instituto de Computação · UFAM<br>
     Secretaria Municipal de Saúde de Manaus · Laboratório Sebastião Marinho<br>
     <a href="{URL_REPO}" target="_blank" rel="noopener">Código-fonte no GitHub</a> ·
-    <a href="{URL_REPO}/releases" target="_blank" rel="noopener">Aplicativo CitoIlumina (Android/iOS)</a> ·
+    <a href="{URL_REPO}/releases" target="_blank" rel="noopener">Aplicativo CitoIllumina (Android/iOS)</a> ·
     <a href="{URL_STREAMLIT}" target="_blank" rel="noopener">Versão anterior (Streamlit)</a>
   </div>
   <div class="rodape-dir">
@@ -142,10 +142,10 @@ def pagina(titulo, corpo, ativo, na_index, scripts, extra_head="", descricao=Non
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{e(titulo)}</title>
   <script>document.documentElement.classList.add("js")</script>{extra_head}
-  <meta name="theme-color" content="#0e6b7b">
+  <meta name="theme-color" content="#4C1D95">
   <link rel="icon" href="{ICONE}">
   <link rel="preload" href="fontes/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/site.css?v=5">
+  <link rel="stylesheet" href="css/site.css?v=6">
 </head>
 <body>
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -444,7 +444,7 @@ def sec_validacao():
   <p class="legenda">{e(m['protocolo'])} · {e(m['conjunto'])} · arquitetura: <code>ConvNeXt Large</code></p>
   <p>O modelo foi avaliado por validação cruzada estratificada em cinco partições, somando <strong>{milhar(m['n_imagens'])} imagens</strong>. Cada imagem foi classificada exatamente uma vez, por um modelo que não a viu no treino. É um protocolo mais exigente que uma única divisão treino/validação, porque toda a base entra na avaliação e o resultado não depende do sorteio de uma partição específica.</p>
   <div class="grade-4 espaco">
-    {cartao_numero("Acurácia global", pct(m['acuracia'], 2), f"IC 95%: {pct(ic[0])} – {pct(ic[1])}", "#0E6B7B")}
+    {cartao_numero("Acurácia global", pct(m['acuracia'], 2), f"IC 95%: {pct(ic[0])} – {pct(ic[1])}", "#4C1D95")}
     {cartao_numero("F1 macro", pct(m['f1_macro'], 2))}
     {cartao_numero("Precisão macro", pct(m['precisao_macro'], 2))}
     {cartao_numero("Recall macro", pct(m['recall_macro'], 2))}

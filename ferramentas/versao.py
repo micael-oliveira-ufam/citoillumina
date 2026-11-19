@@ -1,4 +1,4 @@
-"""Versão única do CitoIlumina.
+"""Versão única do CitoIllumina.
 
 Fonte da verdade: VERSAO (na raiz do repositório), no formato NOME+BUILD, ex.: 1.1.0+2.
 

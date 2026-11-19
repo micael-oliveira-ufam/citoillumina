@@ -1,4 +1,4 @@
-# CitoIlumina — colo do útero com IA
+# CitoIllumina — colo do útero com IA
 
 Aplicativo Flutter (Android e iOS) que reúne, em um só lugar:
 
