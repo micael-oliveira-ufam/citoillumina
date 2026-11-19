@@ -1,4 +1,7 @@
-<p align="center"><img src="docs/img/logo-plataforma.svg" alt="IA Citologia UFAM e SEMSA Manaus" width="520"></p>
+<p align="center"><img src="docs/img/citoilumina.svg" alt="Logotipo do CitoIllumina" width="160"></p>
+
+<p align="center"><strong>🔗 Acesse a ferramenta: <a href="https://micael-oliveira-ufam.github.io/ia_citologia_ufam/">micael-oliveira-ufam.github.io/ia_citologia_ufam</a></strong><br>
+<a href="https://micael-oliveira-ufam.github.io/ia_citologia_ufam/">Análise de imagens com IA</a> · <a href="https://micael-oliveira-ufam.github.io/ia_citologia_ufam/catalogo.html">Catálogo de lâminas</a></p>
 
 # CitoIlumina — colo do útero com IA
 

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../tema.dart';
 import '../versao.dart';
 
 /// Tela de abertura: marca, nome e versão. Some sozinha e mostra [proxima].
@@ -81,7 +80,7 @@ class _TelaSplashState extends State<TelaSplash>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Cores.teal, Cores.tealProfundo],
+            colors: [Color(0xFF4C1D95), Color(0xFF2E1065)],
           ),
         ),
         child: SafeArea(
@@ -94,23 +93,11 @@ class _TelaSplashState extends State<TelaSplash>
                   scale: _escala,
                   child: Column(
                     children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            width: 2,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.biotech_outlined,
-                          size: 60,
-                          color: Colors.white,
-                          semanticLabel: 'Logotipo do CitoIlumina',
-                        ),
+                      Image.asset(
+                        'assets/icone/citoilumina.png',
+                        width: 132,
+                        height: 132,
+                        semanticLabel: 'Logotipo do CitoIllumina',
                       ),
                       const SizedBox(height: 28),
                       const Text(

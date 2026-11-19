@@ -40,7 +40,7 @@ flutter_launcher_icons:
   image_path: "assets/icone/citoilumina_quadrado.png"
   remove_alpha_ios: true
   min_sdk_android: 24
-  adaptive_icon_background: "#0E6B7B"
+  adaptive_icon_background: "#4C1D95"
   adaptive_icon_foreground: "assets/icone/citoilumina_fg.png"
 
 flutter:
@@ -50,3 +50,4 @@ flutter:
     - assets/risco/       # modelo de risco (gerado por ml/train.py)
     - assets/dados/       # estatisticas.json
     - assets/graficos/    # gráficos de desempenho (gerados por ml/train.py)
+    - assets/icone/citoilumina.png  # logotipo (splash)

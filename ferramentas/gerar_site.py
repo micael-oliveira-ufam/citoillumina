@@ -36,7 +36,7 @@ def cabecalho():
     return f"""
 <header class="cabecalho">
   <div class="cab-linha">
-    <a class="cab-logo cab-logo--plataforma" href="index.html" aria-label="IA Citologia: início"><img src="img/logo-plataforma-icone.svg" alt="" width="86" height="86"></a>
+    <a class="cab-logo cab-logo--plataforma" href="index.html" aria-label="CitoIllumina: início"><img src="img/citoilumina.svg" alt="" width="86" height="86"></a>
     <div class="cab-titulo">
       <div class="sobrancelha">UFAM · IComp · SEMSA Manaus</div>
       <h1>Sistema de Apoio ao Diagnóstico Citológico</h1>
@@ -131,7 +131,7 @@ def meta_seo():
   <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>"""
 
 
-ICONE = "img/logo-plataforma-icone.svg"
+ICONE = "img/citoilumina.svg"
 
 
 def pagina(titulo, corpo, ativo, na_index, scripts, extra_head="", descricao=None):
