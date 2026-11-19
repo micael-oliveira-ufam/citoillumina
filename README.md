@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/img/citoilumina.svg" alt="Logotipo do CitoIllumina" width="160"></p>
 
 <p align="center"><strong>🔗 Acesse a ferramenta: <a href="https://micael-oliveira-ufam.github.io/citoillumina/">micael-oliveira-ufam.github.io/citoillumina</a></strong><br>
-<a href="https://micael-oliveira-ufam.github.io/citoillumina/">Análise de imagens com IA</a> · <a href="https://micael-oliveira-ufam.github.io/citoillumina/catalogo.html">Catálogo de lâminas</a></p>
+<a href="https://micael-oliveira-ufam.github.io/citoillumina/">Análise de imagens com IA</a> · <a href="https://micael-oliveira-ufam.github.io/citoillumina/catalogo.html">Catálogo de lâminas</a> · <a href="https://github.com/micael-oliveira-ufam/citoillumina">Repositório no GitHub</a></p>
 
 # CitoIllumina — colo do útero com IA
 
@@ -23,6 +23,23 @@ internet é usada para (1) baixar **uma vez** o arquivo do modelo, publicado no 
 > Uso acadêmico e demonstrativo. O modelo de citologia foi treinado só com o IARC Digital Atlas,
 > sem aprovação de Comitê de Ética, e o de risco tem poder discriminativo fraco (veja
 > *Limitações*). Nenhum dos dois emite laudo nem substitui exame ou profissional.
+
+## Equipe
+
+Projeto da Faculdade de Ciências Farmacêuticas (FCF) e do Instituto de Computação (IComp) da Universidade Federal do Amazonas (UFAM), em parceria com a SEMSA Manaus (Laboratório Prof. Sebastião Marinho).
+
+| Pessoa | Papel | Instituição |
+|---|---|---|
+| **Prof. Dr. Toni Ricardo Martins** | Coordenação e orientação da pesquisa | FCF/UFAM |
+| **Micael Davi Lima de Oliveira** | Desenvolvimento do modelo, do site e do aplicativo (iniciação científica) | FCF/UFAM |
+| **Profa. Dra. Fabíola Nakamura** | Pesquisadora parceira em computação | IComp/UFAM |
+| **Prof. Dr. Felipe Gomes de Oliveira** | Pesquisador parceiro em computação | IComp/UFAM |
+| **Dra. Ivanete de Lima Sampaio** | Especialista clínica e citopatologista (validação) | SEMSA Manaus |
+| **Dra. Carolina Marinho da Costa** | Especialista clínica e citopatologista (validação) | SEMSA Manaus |
+
+No Desafio Universitário Saul Benchimol 2026 (Edição IA), a equipe do projeto também conta com **Elias de Souza Barros**, **Beatriz Penafort** e **Leandro**, com orientação do Prof. Dr. Toni Ricardo Martins.
+
+Como citar: OLIVEIRA, M. D. L.; NAKAMURA, F.; OLIVEIRA, F. G.; MARTINS, T. R.
 
 ## Como o perfil muda o aplicativo
 
