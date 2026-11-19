@@ -54,7 +54,7 @@ ANO_DESENVOLVIMENTO = "2026"
 MODEL_FILE = "convnext_liquid_based_citology_IARC_digital_atlas_01_08_26.pt"
 MODEL_PATH = os.path.join(BASE_DIR, MODEL_FILE)
 MODEL_URL = (
-    "https://github.com/micael-oliveira-ufam/ia_citologia_ufam/releases/download/"
+    "https://github.com/micael-oliveira-ufam/citoillumina/releases/download/"
     f"v.1.1/{MODEL_FILE}"
 )
 

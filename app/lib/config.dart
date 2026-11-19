@@ -13,7 +13,7 @@ const bool exibirSeloAConfirmar = true;
 /// O nome do repositório abaixo é uma suposição: ajuste se o seu for outro.
 const String urlBaseModelo = String.fromEnvironment(
   'URL_BASE_MODELO',
-  defaultValue: 'https://micael-oliveira-ufam.github.io/ia_citologia_ufam/model/',
+  defaultValue: 'https://micael-oliveira-ufam.github.io/citoillumina/model/',
 );
 
 /// Ordem das classes que o aplicativo espera do modelo. O manifesto precisa

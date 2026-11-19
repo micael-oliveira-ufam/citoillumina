@@ -15,7 +15,7 @@ export const FIREBASE = {
 };
 
 // Repositório e site no GitHub (ajuste se o nome do repositório for outro).
-export const REPOSITORIO = 'https://github.com/micael-oliveira-ufam/ia_citologia_ufam';
+export const REPOSITORIO = 'https://github.com/micael-oliveira-ufam/citoillumina';
 
 export const CATALOGO = {
   // Mostra o ID digitado pelo cadastrador mesmo quando não tem o formato L-0001.

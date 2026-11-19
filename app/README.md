@@ -86,7 +86,7 @@ cd .. && git add docs/model && git commit -m "Publica modelo" && git push
 Arquivos acima de 100 MB não entram no GitHub (o script recusa). Ative o Pages em
 *Settings → Pages → Deploy from a branch → `main` / `/docs`*. A URL do modelo no app está em
 `app/lib/config.dart` (`urlBaseModelo`, ou `--dart-define=URL_BASE_MODELO=...`); a do site em
-`docs/js/config.js`. O repositório é `micael-oliveira-ufam/ia_citologia_ufam` (Pages em `https://micael-oliveira-ufam.github.io/ia_citologia_ufam/`).
+`docs/js/config.js`. O repositório é `micael-oliveira-ufam/citoillumina` (Pages em `https://micael-oliveira-ufam.github.io/citoillumina/`).
 
 > A ordem das classes em `lib/data/bethesda.dart` (`ordemDoModelo`: SCC, HSIL, LSIL, NILM) precisa
 > bater com a do treinamento. Trocá-la inverte diagnósticos sem erro visível.

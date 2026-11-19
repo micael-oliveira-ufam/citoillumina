@@ -4,7 +4,7 @@
 # Configurações do GitHub
 # ==========================================
 GITHUB_USER="micael-oliveira-ufam"
-REPO_NAME="ia_citologia_ufam"
+REPO_NAME="citoillumina"
 BRANCH_NAME="main"
 
 echo "=========================================="

@@ -11,7 +11,7 @@ lados na mesma mudança.
 | --- | --- |
 | Checkpoint | `convnext_liquid_based_citology_IARC_digital_atlas_01_08_26.pt` |
 | Conjuntos de treino | IARC Digital Atlas e Liquid Based Cytology Pap Smear (Mendeley Data) |
-| Origem | GitHub Releases `micael-oliveira-ufam/ia_citologia_ufam`, tag `v.1.1` |
+| Origem | GitHub Releases `micael-oliveira-ufam/citoillumina`, tag `v.1.1` |
 | Arquitetura | ConvNeXt Large (torchvision), pesos iniciais do ImageNet |
 | Cabeça | `classifier[2] = Sequential(Dropout(0.5), Linear(in_features, 4))` |
 | Classes | `["SCC", "HSIL", "LSIL", "NILM"]` |

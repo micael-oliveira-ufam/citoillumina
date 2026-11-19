@@ -6,9 +6,9 @@ rode `python ferramentas/gerar_site.py`; no Streamlit, o equivalente é METRICAS
 """
 
 ANO_DESENVOLVIMENTO = "2026"
-URL_SITE = "https://micael-oliveira-ufam.github.io/ia_citologia_ufam/"
+URL_SITE = "https://micael-oliveira-ufam.github.io/citoillumina/"
 URL_STREAMLIT = "https://ia-citologia-ufam.streamlit.app/"
-URL_REPO = "https://github.com/micael-oliveira-ufam/ia_citologia_ufam"
+URL_REPO = "https://github.com/micael-oliveira-ufam/citoillumina"
 
 # Mesma ordem do treinamento (ver PARAMETROS_COMPARTILHADOS.md). NÃO reordenar.
 CLASSES = ["SCC", "HSIL", "LSIL", "NILM"]
