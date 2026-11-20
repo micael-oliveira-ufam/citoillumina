@@ -894,6 +894,10 @@ function painelAnalises(l, minha, falha) {
     if (viewer) {
       const det = Object.entries(viewer.d).map(([k, v]) => `${k} ${v}`).join(' · ');
       comp.append(el('p', { class: 'pequeno' }, `Cervical AI Viewer: ${viewer.n} detecções (${det}). A classe mostrada é a mais grave detectada, com a maior probabilidade dentro dela.`));
+      const fig = el('figure', { class: 'anotada' },
+        el('img', { src: `anotadas/${l.patientId}.jpg`, alt: `Lâmina ${idPublico(l.patientId).texto} com as detecções do Cervical AI Viewer`, loading: 'lazy', style: 'max-width:100%;height:auto;border-radius:8px' }),
+        el('figcaption', { class: 'legenda' }, 'Imagem anotada pelo Cervical AI Viewer (reduzida).'));
+      comp.append(fig);
     }
     if (notas.length) {
       comp.append(el('p', { class: 'pequeno' }, notas.map(([k, v]) => `${k}: ${v}`).join(' · ')));
