@@ -704,6 +704,11 @@ const CLASSES_MODELO = new Set(['SCC', 'HSIL', 'LSIL', 'NILM']);
 const pct = (v) => `${(v * 100).toFixed(1).replace('.', ',')}%`;
 
 /** O modelo só conhece 4 classes; as demais das 8 do CitoAtlas não têm equivalente direto. */
+// Inferência já feita no Cervical AI Viewer (ferramenta externa) para as lâminas do catálogo.
+let inferenciaExterna = null;
+const promessaInferencia = fetch('data/inferencia_externa.json?v=1')
+  .then((r) => (r.ok ? r.json() : null)).then((j) => { inferenciaExterna = j; }).catch(() => {});
+
 function comparar(a, b) {
   if (!a || !b) return null;
   if (!CLASSES_MODELO.has(a) || !CLASSES_MODELO.has(b)) return 'sem equivalente direto';
@@ -870,23 +875,33 @@ function painelAnalises(l, minha, falha) {
     if (!m) { comp.append(el('p', { class: 'pequeno' }, 'Avalie a lâmina para liberar a comparação entre humano, IA e validador externo.')); return; }
     const iaSigla = m.aiClassification || estado.minhasIA.get(l.id)?.sigla || null;
     const iaConf = m.aiClassification ? m.aiConfidence : estado.minhasIA.get(l.id)?.confianca;
+    const viewer = inferenciaExterna?.lamina?.[l.patientId] || null;
     const linhas = [
       ['Análise humana (sua)', m.classification],
       ['IA interna', iaSigla ? `${iaSigla}${iaConf ? ` (${pct(iaConf)})` : ''}` : null],
-      ['Validador externo', m.externalClassification || null],
+      ['Cervical AI Viewer (inferência externa)', viewer ? `${viewer.c} (${viewer.p}%)` : null],
+      ['Validador externo (registrado por você)', m.externalClassification || null],
     ];
     comp.append(el('table', { class: 'tabela' }, el('tbody', {}, ...linhas.map(([a, b]) =>
       el('tr', {}, el('td', {}, a), el('td', {}, el('strong', {}, b || 'ainda não feita'))))))); 
     const hi = comparar(m.classification, iaSigla);
     const he = comparar(m.classification, m.externalClassification === 'Inconclusivo' ? null : m.externalClassification);
     const ie = comparar(iaSigla, m.externalClassification === 'Inconclusivo' ? null : m.externalClassification);
-    const notas = [['humano × IA', hi], ['humano × externo', he], ['IA × externo', ie]].filter(([, v]) => v);
+    const hv = comparar(m.classification, viewer?.c);
+    const iv = comparar(iaSigla, viewer?.c);
+    const notas = [['humano × IA', hi], ['humano × externo', he], ['IA × externo', ie],
+      ['humano × Viewer', hv], ['IA × Viewer', iv]].filter(([, v]) => v);
+    if (viewer) {
+      const det = Object.entries(viewer.d).map(([k, v]) => `${k} ${v}`).join(' · ');
+      comp.append(el('p', { class: 'pequeno' }, `Cervical AI Viewer: ${viewer.n} detecções (${det}). A classe mostrada é a mais grave detectada, com a maior probabilidade dentro dela.`));
+    }
     if (notas.length) {
       comp.append(el('p', { class: 'pequeno' }, notas.map(([k, v]) => `${k}: ${v}`).join(' · ')));
       comp.append(el('p', { class: 'legenda' }, 'O modelo só distingue NILM, LSIL, HSIL e SCC; ASC-US, ASC-H, Adenocarcinoma e Outro não têm equivalente direto.'));
     }
   }
   desenharComparacao();
+  promessaInferencia.then(desenharComparacao);
   caixa.append(comp);
   return caixa;
 }
