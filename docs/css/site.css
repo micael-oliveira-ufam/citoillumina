@@ -408,3 +408,20 @@ dialog.visor:not(.visor--form) { width: min(1120px, 96vw); }
   .visor__painel { border-left: 0; border-top: 1px solid var(--linha); overflow: visible; }
 }
 @media (max-width: 420px) { .bethesda-grade { grid-template-columns: 1fr; } }
+
+/* ---- comparação de análises (catálogo) ---- */
+.fonte-ia { border: 1px solid var(--linha, #d9dee3); border-radius: 10px; padding: .6rem .8rem; margin: .6rem 0; }
+.fonte-ia legend { font-weight: 600; font-size: .9rem; padding: 0 .3rem; }
+.cmp-selecao { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: .6rem 0; }
+.tabela-rolagem { overflow-x: auto; max-width: 100%; }
+.tabela-rolagem table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+.tabela-rolagem th, .tabela-rolagem td { border: 1px solid #d9dee3; padding: .35rem .55rem; text-align: right; }
+.tabela-rolagem th[scope="row"], .tabela-rolagem thead th:first-child { text-align: left; }
+.tabela-rolagem thead th { background: #F3E8FF; }
+.celula-matriz { text-align: center !important; font-variant-numeric: tabular-nums; }
+.metricas { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: .8rem 0; }
+.metrica { display: flex; flex-direction: column; gap: .15rem; padding: .6rem .75rem; border: 1px solid #d9dee3; border-radius: 10px; background: #faf5ff; }
+.metrica__valor { font-size: 1.4rem; font-weight: 700; color: #4C1D95; font-variant-numeric: tabular-nums; }
+.metrica__rotulo { font-size: .85rem; }
+#cmp-resultado h3 { margin: 1rem 0 .4rem; }
+#cmp-resultado h4 { margin: 1rem 0 .3rem; }

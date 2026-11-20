@@ -145,7 +145,7 @@ def pagina(titulo, corpo, ativo, na_index, scripts, extra_head="", descricao=Non
   <meta name="theme-color" content="#4C1D95">
   <link rel="icon" href="{ICONE}">
   <link rel="preload" href="fontes/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/site.css?v=6">
+  <link rel="stylesheet" href="css/site.css?v=7">
 </head>
 <body>
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -624,7 +624,7 @@ def main():
 
     cat = (Path(__file__).parent / "catalogo_corpo.html").read_text(encoding="utf-8")
     catalogo = pagina("Catálogo de lâminas | " + SEO_TITULO, cat, "catalogo", False,
-                      '  <script type="module" src="js/catalogo.js?v=18"></script>',
+                      '  <script type="module" src="js/catalogo.js?v=19"></script>',
                       extra_head=f'\n  <meta name="description" content="Catálogo eletrônico de lâminas de citopatologia cervical do Laboratório Prof. Sebastião Marinho (UFAM / SEMSA). Cadastro, consulta e avaliação cega, sem necessidade de conta Google.">')
     (DOCS / "catalogo.html").write_text(catalogo, encoding="utf-8")
 

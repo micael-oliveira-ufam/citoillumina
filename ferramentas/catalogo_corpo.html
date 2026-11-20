@@ -55,10 +55,18 @@
         <p class="exibicao__titulo" id="exibicao-titulo">O que mostrar nas lâminas</p>
         <label class="chave"><input type="checkbox" id="mostrar-ia"><span>Mostrar classificações e predições da IA</span></label>
         <label class="chave"><input type="checkbox" id="mostrar-votos"><span>Mostrar votos realizados</span></label>
+        <fieldset class="campo fonte-ia" id="fonte-ia">
+          <legend>Predição de IA a mostrar (vale para cartões, visor e filtro)</legend>
+          <label class="opcao"><input type="radio" name="fonte-ia" value="cito" checked>
+            <span><strong>CitoIllumina</strong> (modelo próprio): NILM, LSIL, HSIL e SCC, com a confiança registrada.</span></label>
+          <label class="opcao"><input type="radio" name="fonte-ia" value="viewer">
+            <span><strong>Cervical AI Viewer</strong> (ferramenta externa): classe mais grave detectada, com a <strong>imagem anotada</strong> no lugar da foto original.</span></label>
+        </fieldset>
         <p class="pequeno">Desligadas por padrão, para manter a avaliação cega. Quando ligadas, as informações aparecem nos cartões e no visualizador.</p>
       </div>
       <div class="barra-acoes">
         <button class="btn btn--sec" id="baixar-classes" type="button">Baixar imagens por classe (.zip)</button>
+        <button class="btn" id="abrir-comparar" type="button">Comparar IA × IA e IA × humano</button>
       </div>
 
       <div id="selecao" class="barra barra--sel" hidden>
@@ -97,6 +105,37 @@
       <div class="visor__rodape">
         <button class="btn" id="lote-rodar" type="button">Executar análise em lote</button>
         <button class="btn btn--sec" id="lote-csv" type="button" disabled>Baixar CSV</button>
+      </div>
+    </div>
+  </dialog>
+
+<dialog class="visor visor--form" id="comparar" aria-labelledby="cmp-titulo">
+    <div class="visor__in">
+      <div class="visor__topo">
+        <h2 id="cmp-titulo">Comparar análises</h2>
+        <button class="btn btn--sec" id="cmp-fechar" type="button">Fechar</button>
+      </div>
+      <div class="form-corpo">
+        <p class="aviso aviso--atencao">Esta tela mostra classificações de todas as lâminas carregadas. Não a use para lâminas que você ainda não avaliou: isso compromete a avaliação cega.</p>
+        <fieldset class="campo">
+          <legend>Tipo de comparação</legend>
+          <label class="opcao"><input type="radio" name="cmp-modo" value="ia-ia" checked><span><strong>IA × IA</strong>: CitoIllumina contra Cervical AI Viewer.</span></label>
+          <label class="opcao"><input type="radio" name="cmp-modo" value="ia-humano"><span><strong>IA × humano</strong>: a IA que você escolher contra a referência humana.</span></label>
+        </fieldset>
+        <div class="cmp-selecao">
+          <div class="campo"><label for="cmp-a" id="cmp-a-rot">IA comparada (A)</label>
+            <select id="cmp-a"><option value="cito">CitoIllumina (modelo próprio)</option><option value="viewer">Cervical AI Viewer</option></select></div>
+          <div class="campo" id="cmp-b-caixa"><label for="cmp-b" id="cmp-b-rot">IA de referência (B)</label>
+            <select id="cmp-b"><option value="viewer">Cervical AI Viewer</option><option value="cito">CitoIllumina (modelo próprio)</option></select></div>
+        </div>
+        <label class="caixa-marcar"><input type="checkbox" id="cmp-agrupar">
+          <span><strong>Agrupar classes</strong> <span class="pequeno bloco">ASC-US conta como LSIL e ASC-H como HSIL, para alinhar com as 4 classes do CitoIllumina (que não tem ASC-US nem ASC-H).</span></span></label>
+        <p class="pequeno" id="cmp-carga" role="status" aria-live="polite"></p>
+        <div id="cmp-resultado"></div>
+      </div>
+      <div class="visor__rodape">
+        <button class="btn btn--sec" id="cmp-todas" type="button">Carregar todas as lâminas</button>
+        <button class="btn btn--sec" id="cmp-csv" type="button" disabled>Baixar CSV dos pares</button>
       </div>
     </div>
   </dialog>

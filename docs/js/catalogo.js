@@ -18,6 +18,7 @@ import {
 } from './ia.js?v=5';
 import { CATEGORIAS } from './bethesda.js';
 import { CLASS_INFO } from './dados.js';
+import { comparar as compararPares, totaisPorClasse, leituraKappa, ORDEM as ORDEM_CLASSES } from './comparacao.js?v=1';
 
 const CLASSES = [
   ['NILM', 'Negativo para Lesão ou Malignidade'],
@@ -48,6 +49,7 @@ const estado = {
   revelarIA: false, // o usuário aceitou ver a IA antes de avaliar (pode influenciar a avaliação cega)
   mostrarIA: lerPrefs().ia === true, // opt-in: classificações humanas e predições da IA nos cartões
   mostrarVotos: lerPrefs().votos === true, // opt-in: contagem de votos nos cartões
+  fonteIA: lerPrefs().fonte === 'viewer' ? 'viewer' : 'cito', // predição de IA exibida: modelo próprio ou Cervical AI Viewer
   resumo: null, // Map(slideId -> avaliações) quando já carregado
   resumoCarregando: false,
   resumoErro: false,
@@ -57,7 +59,7 @@ function lerPrefs() {
   try { return JSON.parse(localStorage.getItem(PREF_CHAVE) || '{}') || {}; } catch (e) { return {}; }
 }
 function salvarPrefs() {
-  try { localStorage.setItem(PREF_CHAVE, JSON.stringify({ ia: estado.mostrarIA, votos: estado.mostrarVotos })); } catch (e) { /* navegador sem armazenamento */ }
+  try { localStorage.setItem(PREF_CHAVE, JSON.stringify({ ia: estado.mostrarIA, votos: estado.mostrarVotos, fonte: estado.fonteIA })); } catch (e) { /* navegador sem armazenamento */ }
 }
 
 /** Consenso humano: classe com maioria das avaliações, com no mínimo `votosParaConsenso`. */
@@ -68,6 +70,41 @@ function consensoHumano(lista) {
   for (const v of votos) cont[v] = (cont[v] || 0) + 1;
   const [sigla, n] = Object.entries(cont).sort((a, b) => b[1] - a[1])[0];
   return n > votos.length / 2 ? { sigla, n, total: votos.length } : null;
+}
+
+// Inferência do Cervical AI Viewer (ferramenta externa) por lâmina, carregada de data/inferencia_externa.json.
+let inferenciaExterna = null;
+const promessaInferencia = fetch('data/inferencia_externa.json?v=1')
+  .then((r) => (r.ok ? r.json() : null))
+  .then((j) => { inferenciaExterna = j; })
+  .catch(() => {});
+
+const ID_SEGURO = /^L-\d{1,6}$/;
+/** Resultado do Viewer para a lâmina: { c: classe, p: %, n: detecções, d: contagem por classe } ou null. */
+function viewerDe(l) { return (ID_SEGURO.test(l.patientId || '') && inferenciaExterna?.lamina?.[l.patientId]) || null; }
+const usaViewer = () => estado.fonteIA === 'viewer';
+/** Imagem do cartão/visor: a anotada do Viewer quando essa é a fonte escolhida, senão a original. */
+function urlImagemExibida(l) {
+  if (estado.mostrarIA && usaViewer() && viewerDe(l)) return `anotadas/${l.patientId}.jpg`;
+  return urlImagemSegura(l.imageUrl);
+}
+/** Se a imagem anotada falhar, volta para a original. */
+function comFallback(img, l) {
+  img.addEventListener('error', () => {
+    const original = urlImagemSegura(l.imageUrl);
+    if (original && img.getAttribute('src') !== original) img.src = original;
+  });
+  return img;
+}
+/** Classe de IA da fonte escolhida para a lâmina (ou null). */
+function siglaFonte(l, lista) { return usaViewer() ? (viewerDe(l)?.c || null) : siglaIA(lista); }
+/** Texto da predição da fonte escolhida para cartão e visor. */
+function textoIA(l, lista) {
+  if (usaViewer()) {
+    const v = viewerDe(l);
+    return v ? `${v.c} (${v.p}%) · ${v.n} detecções` : null;
+  }
+  return iaRegistrada(lista);
 }
 
 /** Classe da IA para esta lâmina: a mais frequente entre as predições registradas (ou null). */
@@ -124,6 +161,7 @@ async function carregarResumo() {
     estado.resumoCarregando = false;
     renderizar();
     if (visor.open) desenharResumoVisor();
+    if (cmpDlg.open) desenharComparar();
   }
 }
 
@@ -239,7 +277,7 @@ function passaFiltroLesao(l, valor) {
   if (!estado.resumo) return false; // classificações ainda carregando
   const [fonte, sigla] = valor.split(':');
   const lista = estado.resumo.get(l.id) || [];
-  const atual = fonte === 'h' ? (consensoHumano(lista)?.sigla || null) : siglaIA(lista);
+  const atual = fonte === 'h' ? (consensoHumano(lista)?.sigla || null) : siglaFonte(l, lista);
   return sigla === '__sem__' ? atual === null : atual === sigla;
 }
 
@@ -248,7 +286,7 @@ function atualizarFiltroLesao() {
   limpar(filtroLesaoEl);
   filtroLesaoEl.append(el('option', { value: 'todas' }, 'Todos os tipos'));
   const humano = el('optgroup', { label: 'Pela avaliação humana (consenso)' });
-  const ia = el('optgroup', { label: 'Pela predição da IA' });
+  const ia = el('optgroup', { label: usaViewer() ? 'Pela predição do Cervical AI Viewer' : 'Pela predição da IA (CitoIllumina)' });
   for (const [sigla] of CLASSES) {
     const nome = CATEGORIAS[sigla]?.nome;
     const texto = nome ? `${sigla} · ${nome}` : sigla;
@@ -256,7 +294,7 @@ function atualizarFiltroLesao() {
     ia.append(el('option', { value: `i:${sigla}` }, texto));
   }
   humano.append(el('option', { value: 'h:__sem__' }, 'Sem consenso (menos de 3 avaliações ou sem maioria)'));
-  ia.append(el('option', { value: 'i:__sem__' }, 'Sem análise da IA'));
+  ia.append(el('option', { value: 'i:__sem__' }, usaViewer() ? 'Sem análise do Viewer' : 'Sem análise da IA'));
   filtroLesaoEl.append(humano, ia);
   filtroLesaoEl.value = [...filtroLesaoEl.options].some((o) => o.value === atual) ? atual : 'todas';
   filtroLesaoEl.disabled = !estado.mostrarIA;
@@ -315,10 +353,10 @@ function chipsClassificacao(l) {
   if (!estado.mostrarIA || !estado.resumo) return [];
   const lista = estado.resumo.get(l.id) || [];
   const cons = consensoHumano(lista);
-  const ia = siglaIA(lista);
+  const ia = siglaFonte(l, lista);
   const itens = [];
   if (cons) itens.push(['Humano', cons.sigla]);
-  if (ia) itens.push(['IA', ia]);
+  if (ia) itens.push([usaViewer() ? 'Viewer' : 'IA', ia]);
   return itens.map(([rotulo, sigla]) => {
     const cor = corDaClasse(sigla);
     return el('span', {
@@ -340,14 +378,14 @@ function cartao(l) {
   const id = idPublico(l.patientId);
   const n = votosDe(l);
   const selo = seloVotos(n);
-  const url = urlImagemSegura(l.imageUrl);
+  const url = urlImagemExibida(l);
   const botao = el('button', {
     class: 'lamina', type: 'button',
     'aria-label': `Abrir ${id.texto}`,
     onclick: () => abrirVisor(l),
   },
   el('div', { class: 'lamina__foto' },
-    el('img', { src: url, alt: `Campo microscópico da ${id.texto}`, loading: 'lazy', decoding: 'async' }),
+    comFallback(el('img', { src: url, alt: `Campo microscópico da ${id.texto}${url.startsWith('anotadas/') ? ' com anotações do Cervical AI Viewer' : ''}`, loading: 'lazy', decoding: 'async' }), l),
     (souCriador(l) || !estado.mostrarIA)
       ? el('span', { class: 'lamina__selo' }, souCriador(l) ? 'Sua lâmina' : 'Classificação oculta')
       : null,
@@ -382,12 +420,12 @@ function blocoClassificacoes(l) {
   }
   const lista = estado.resumo.get(l.id) || [];
   const cons = consensoHumano(lista);
-  const ia = iaRegistrada(lista);
+  const ia = textoIA(l, lista);
   return el('span', { class: 'lamina__resumo' },
     el('span', { class: 'lamina__res-linha' }, el('strong', {}, 'Humano: '),
       cons ? `${cons.sigla} (${cons.n} de ${cons.total})` : (lista.length ? 'sem consenso' : 'sem avaliações')),
-    el('span', { class: 'lamina__res-linha' }, el('strong', {}, 'IA: '),
-      ia || 'sem análise registrada'));
+    el('span', { class: 'lamina__res-linha' }, el('strong', {}, usaViewer() ? 'Viewer: ' : 'IA: '),
+      ia || (usaViewer() ? 'sem inferência do Viewer' : 'sem análise registrada')));
 }
 
 function renderizar() {
@@ -470,7 +508,8 @@ function abrirVisor(l) {
   visorInfo.textContent = textoInfoVisor(l, n);
   visorImg.alt = `Campo microscópico da ${id.texto}`;
   visorImg.onload = ajustarVista;
-  visorImg.src = urlImagemSegura(l.imageUrl);
+  visorImg.onerror = () => { const o = urlImagemSegura(l.imageUrl); if (o && visorImg.getAttribute('src') !== o) visorImg.src = o; };
+  visorImg.src = urlImagemExibida(l);
   if (visorImg.complete && visorImg.naturalWidth) ajustarVista();
   desenharPainel();
   desenharResumoVisor();
@@ -503,7 +542,7 @@ function desenharResumoVisor() {
       const cons = consensoHumano(lista);
       linhas.push(el('p', {}, el('strong', {}, 'Classificação humana: '),
         cons ? `${cons.sigla} (${cons.n} de ${cons.total} avaliações)` : (lista.length ? 'sem consenso ainda' : 'sem avaliações')));
-      linhas.push(el('p', {}, el('strong', {}, 'Predição da IA registrada: '), iaRegistrada(lista) || 'nenhuma análise registrada'));
+      linhas.push(el('p', {}, el('strong', {}, usaViewer() ? 'Predição do Cervical AI Viewer: ' : 'Predição da IA registrada: '), textoIA(atual, lista) || (usaViewer() ? 'sem inferência do Viewer' : 'nenhuma análise registrada')));
     }
   }
   caixa.append(el('div', { class: 'resumo-visor', role: 'status' }, ...linhas));
@@ -704,11 +743,6 @@ const CLASSES_MODELO = new Set(['SCC', 'HSIL', 'LSIL', 'NILM']);
 const pct = (v) => `${(v * 100).toFixed(1).replace('.', ',')}%`;
 
 /** O modelo só conhece 4 classes; as demais das 8 do CitoAtlas não têm equivalente direto. */
-// Inferência já feita no Cervical AI Viewer (ferramenta externa) para as lâminas do catálogo.
-let inferenciaExterna = null;
-const promessaInferencia = fetch('data/inferencia_externa.json?v=1')
-  .then((r) => (r.ok ? r.json() : null)).then((j) => { inferenciaExterna = j; }).catch(() => {});
-
 function comparar(a, b) {
   if (!a || !b) return null;
   if (!CLASSES_MODELO.has(a) || !CLASSES_MODELO.has(b)) return 'sem equivalente direto';
@@ -875,7 +909,7 @@ function painelAnalises(l, minha, falha) {
     if (!m) { comp.append(el('p', { class: 'pequeno' }, 'Avalie a lâmina para liberar a comparação entre humano, IA e validador externo.')); return; }
     const iaSigla = m.aiClassification || estado.minhasIA.get(l.id)?.sigla || null;
     const iaConf = m.aiClassification ? m.aiConfidence : estado.minhasIA.get(l.id)?.confianca;
-    const viewer = inferenciaExterna?.lamina?.[l.patientId] || null;
+    const viewer = viewerDe(l);
     const linhas = [
       ['Análise humana (sua)', m.classification],
       ['IA interna', iaSigla ? `${iaSigla}${iaConf ? ` (${pct(iaConf)})` : ''}` : null],
@@ -1178,6 +1212,179 @@ mostrarVotosEl.addEventListener('change', () => {
   salvarPrefs();
   renderizar();
   if (visor.open) { atualizarInfoVisor(); desenharResumoVisor(); }
+});
+
+// Fonte de IA exibida (CitoIllumina × Cervical AI Viewer)
+for (const r of document.querySelectorAll('input[name="fonte-ia"]')) {
+  r.checked = r.value === estado.fonteIA;
+  r.addEventListener('change', () => {
+    if (!r.checked) return;
+    estado.fonteIA = r.value;
+    salvarPrefs();
+    atualizarFiltroLesao();
+    renderizar();
+    if (visor.open && atual) {
+      visorImg.src = urlImagemExibida(atual);
+      desenharResumoVisor();
+    }
+  });
+}
+promessaInferencia.then(() => { renderizar(); if (cmpDlg.open) desenharComparar(); });
+
+// ------------------------------------------------ comparar IA × IA e IA × humano
+
+const cmpDlg = $('#comparar');
+const cmpResultado = $('#cmp-resultado');
+const cmpCarga = $('#cmp-carga');
+const cmpA = $('#cmp-a');
+const cmpB = $('#cmp-b');
+const cmpAgrupar = $('#cmp-agrupar');
+const cmpCsvBtn = $('#cmp-csv');
+const cmpTodasBtn = $('#cmp-todas');
+let cmpPares = [];
+
+const NOME_FONTE = {
+  cito: 'CitoIllumina (modelo)', viewer: 'Cervical AI Viewer',
+  consenso: 'Humano (consenso das avaliações)', cadastro: 'Humano (rótulo do cadastro)',
+};
+const modoCmp = () => document.querySelector('input[name="cmp-modo"]:checked')?.value || 'ia-ia';
+
+/** Classe de uma lâmina segundo a fonte: cito, viewer, consenso ou cadastro. */
+function classeDaFonte(fonte, l) {
+  const lista = estado.resumo?.get(l.id) || [];
+  if (fonte === 'cito') return siglaIA(lista);
+  if (fonte === 'viewer') return viewerDe(l)?.c || null;
+  if (fonte === 'consenso') return consensoHumano(lista)?.sigla || null;
+  if (fonte === 'cadastro') return SIGLAS.has(l.classification) ? l.classification : null;
+  return null;
+}
+
+function opcoesCmp() {
+  const humano = modoCmp() === 'ia-humano';
+  const antigoB = cmpB.value;
+  limpar(cmpB);
+  const lista = humano ? ['consenso', 'cadastro'] : ['viewer', 'cito'];
+  for (const v of lista) cmpB.append(el('option', { value: v }, NOME_FONTE[v]));
+  cmpB.value = lista.includes(antigoB) ? antigoB : lista[0];
+  $('#cmp-a-rot').textContent = humano ? 'IA a comparar' : 'IA comparada (A)';
+  $('#cmp-b-rot').textContent = humano ? 'Referência humana' : 'IA de referência (B)';
+}
+
+const pct1 = (x) => (x === null || x === undefined ? 'n/d' : `${(x * 100).toFixed(1).replace('.', ',')}%`);
+const num2 = (x) => (x === null || x === undefined ? 'n/d' : x.toFixed(2).replace('.', ','));
+
+function tabelaSimples(cabecalho, linhas, classe = 'tabela') {
+  return el('div', { class: 'tabela-rolagem' }, el('table', { class: classe },
+    el('thead', {}, el('tr', {}, ...cabecalho.map((h) => el('th', { scope: 'col' }, h)))),
+    el('tbody', {}, ...linhas.map((l) => el('tr', {}, ...l.map((c, i) => (i === 0 ? el('th', { scope: 'row' }, c) : el('td', {}, c))))))));
+}
+
+function metrica(rotulo, valor, nota) {
+  return el('div', { class: 'metrica' }, el('span', { class: 'metrica__valor' }, valor),
+    el('span', { class: 'metrica__rotulo' }, rotulo), nota ? el('span', { class: 'metrica__nota pequeno' }, nota) : null);
+}
+
+function desenharComparar() {
+  limpar(cmpResultado);
+  cmpPares = [];
+  cmpCsvBtn.disabled = true;
+  cmpTodasBtn.hidden = estado.fim;
+  if (!estado.resumo) {
+    cmpCarga.textContent = estado.resumoErro
+      ? 'Classificações indisponíveis no momento.' : 'Carregando classificações…';
+    if (!estado.resumo && !estado.resumoCarregando && !estado.resumoErro) carregarResumo();
+    return;
+  }
+  if (!inferenciaExterna) { cmpCarga.textContent = 'Carregando dados do Cervical AI Viewer…'; return; }
+  const agrupa = cmpAgrupar.checked;
+  const lams = estado.laminas;
+  cmpCarga.textContent = `${lams.length} lâminas carregadas${estado.fim ? '' : ' (catálogo ainda parcial: use “Carregar todas as lâminas” para incluir todas)'}.`;
+  if (!lams.length) return;
+
+  // 1) Totais por classe em todas as fontes
+  const fontes = ['cito', 'viewer', 'consenso', 'cadastro'];
+  const listas = Object.fromEntries(fontes.map((f) => [f, lams.map((l) => classeDaFonte(f, l))]));
+  const totais = Object.fromEntries(fontes.map((f) => [f, totaisPorClasse(listas[f], agrupa)]));
+  const classesVistas = new Set();
+  for (const f of fontes) for (const c of totais[f].keys()) classesVistas.add(c);
+  const ordem = [...classesVistas].sort((x, y) => (ORDEM_CLASSES.indexOf(x) + 1 || 99) - (ORDEM_CLASSES.indexOf(y) + 1 || 99));
+  const linhasTotais = ordem.map((c) => [c, ...fontes.map((f) => String(totais[f].get(c) || 0))]);
+  linhasTotais.push(['Com classificação', ...fontes.map((f) => String(listas[f].filter(Boolean).length))]);
+  linhasTotais.push(['Sem classificação', ...fontes.map((f) => String(listas[f].filter((x) => !x).length))]);
+  cmpResultado.append(
+    el('h3', {}, 'Total de lâminas por classe'),
+    tabelaSimples(['Classe', ...fontes.map((f) => NOME_FONTE[f])], linhasTotais),
+    el('p', { class: 'legenda' }, 'O consenso humano exige no mínimo 3 avaliações com maioria; o rótulo do cadastro é a classe informada por quem cadastrou a lâmina. O CitoIllumina só distingue NILM, LSIL, HSIL e SCC.'));
+
+  // 2) Comparação escolhida
+  const humano = modoCmp() === 'ia-humano';
+  const fa = cmpA.value; const fb = cmpB.value;
+  if (!humano && fa === fb) {
+    cmpResultado.append(el('p', { class: 'aviso aviso--atencao' }, 'Escolha duas IAs diferentes para comparar IA × IA.'));
+    return;
+  }
+  cmpPares = lams.map((l) => ({ id: l.patientId, a: classeDaFonte(fa, l), b: classeDaFonte(fb, l) }));
+  const r = compararPares(cmpPares, { agrupa });
+  cmpCsvBtn.disabled = r.n === 0;
+  cmpResultado.append(el('h3', {}, `${NOME_FONTE[fa]} × ${NOME_FONTE[fb]}`));
+  if (r.n === 0) {
+    cmpResultado.append(el('p', { class: 'aviso aviso--info' }, 'Nenhuma lâmina tem classificação nas duas fontes escolhidas.'));
+    return;
+  }
+  cmpResultado.append(el('p', { class: 'pequeno' },
+    `${r.n} de ${lams.length} lâminas têm classificação nas duas fontes; as demais ficam de fora do cálculo.`));
+  cmpResultado.append(el('div', { class: 'metricas' },
+    metrica('Concordância exata', pct1(r.concordancia), `${r.exatos} de ${r.n}`),
+    metrica('Kappa de Cohen', num2(r.kappa), leituraKappa(r.kappa)),
+    metrica('Sensibilidade p/ lesão', pct1(r.lesao.sensibilidade), `${r.lesao.tp} de ${r.lesao.tp + r.lesao.fn}`),
+    metrica('Especificidade p/ lesão', pct1(r.lesao.especificidade), r.lesao.tn + r.lesao.fp ? `${r.lesao.tn} de ${r.lesao.tn + r.lesao.fp}` : 'sem lâminas negativas na referência'),
+    metrica('Sensibilidade p/ alto grau', pct1(r.altoGrau.sensibilidade), `${r.altoGrau.tp} de ${r.altoGrau.tp + r.altoGrau.fn}`),
+    metrica('Valor preditivo positivo (lesão)', pct1(r.lesao.vpp), `${r.lesao.tp} de ${r.lesao.tp + r.lesao.fp}`)));
+  cmpResultado.append(el('p', { class: 'legenda' },
+    'Lesão = qualquer classe diferente de NILM. Alto grau = ASC-H, HSIL ou SCC. As métricas tomam a fonte B como referência'
+    + (humano ? '.' : ' apenas para comparar; nenhuma das duas IAs é verdade absoluta.')));
+
+  // matriz de confusão (linhas: A; colunas: B)
+  const max = Math.max(1, ...r.classes.flatMap((a) => r.classes.map((b) => r.matriz[a][b])));
+  const cab = el('tr', {}, el('th', { scope: 'col' }, `${humano ? 'IA' : 'A'} ↓ · ${humano ? 'humano' : 'B'} →`),
+    ...r.classes.map((c) => el('th', { scope: 'col' }, c)), el('th', { scope: 'col' }, 'Total'));
+  const corpo = r.classes.map((a) => el('tr', {}, el('th', { scope: 'row' }, a),
+    ...r.classes.map((b) => {
+      const v = r.matriz[a][b];
+      const cor = a === b ? '46,125,98' : '178,58,58';
+      return el('td', { class: 'celula-matriz', style: v ? `background:rgba(${cor},${(0.12 + 0.55 * v / max).toFixed(2)})` : '' }, String(v));
+    }), el('td', {}, String(r.classes.reduce((t, b) => t + r.matriz[a][b], 0)))));
+  cmpResultado.append(el('h4', {}, 'Matriz de confusão'),
+    el('div', { class: 'tabela-rolagem' }, el('table', { class: 'tabela matriz' }, el('thead', {}, cab), el('tbody', {}, ...corpo))),
+    el('p', { class: 'legenda' }, 'Diagonal (verde) = concordam. Fora da diagonal (vermelho) = divergem.'));
+
+  cmpResultado.append(el('h4', {}, 'Por classe'),
+    tabelaSimples(['Classe', `Classificadas por ${humano ? 'IA' : 'A'}`, `Na referência ${humano ? '(humano)' : '(B)'}`, 'Acertos', 'Precisão', 'Revocação', 'F1'],
+      r.porClasse.map((c) => [c.classe, String(c.predito), String(c.real), String(c.tp), pct1(c.precisao), pct1(c.revocacao), pct1(c.f1)])));
+}
+
+function abrirComparar() {
+  opcoesCmp();
+  if (!estado.resumo && !estado.resumoCarregando) carregarResumo();
+  desenharComparar();
+  cmpDlg.showModal();
+}
+$('#abrir-comparar').addEventListener('click', abrirComparar);
+$('#cmp-fechar').addEventListener('click', () => cmpDlg.close());
+cmpDlg.addEventListener('click', (e) => { if (e.target === cmpDlg) cmpDlg.close(); });
+for (const r of document.querySelectorAll('input[name="cmp-modo"]')) r.addEventListener('change', () => { opcoesCmp(); desenharComparar(); });
+for (const c of [cmpA, cmpB, cmpAgrupar]) c.addEventListener('change', desenharComparar);
+cmpTodasBtn.addEventListener('click', async () => {
+  cmpTodasBtn.disabled = true;
+  await carregarTodas();
+  cmpTodasBtn.disabled = false;
+  if (cmpDlg.open) desenharComparar();
+});
+cmpCsvBtn.addEventListener('click', () => {
+  const fa = cmpA.value; const fb = cmpB.value;
+  const linhas = [['id_lamina', `A_${fa}`, `B_${fb}`, 'iguais']];
+  for (const p of cmpPares) if (p.a && p.b) linhas.push([p.id, p.a, p.b, p.a === p.b ? 1 : 0]);
+  baixarTexto(`comparacao_${fa}_x_${fb}.csv`, csv(linhas));
 });
 
 const dlDlg = $('#dialogo-download');
