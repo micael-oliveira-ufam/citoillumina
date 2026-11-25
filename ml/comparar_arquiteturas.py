@@ -61,6 +61,7 @@ from sklearn.metrics import (accuracy_score, balanced_accuracy_score, classifica
                              cohen_kappa_score, confusion_matrix, f1_score, log_loss,
                              matthews_corrcoef, precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold
+from matplotlib.ticker import MaxNLocator
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models
 
@@ -292,6 +293,7 @@ def carregar_resultados(args, nomes, n_total):
 
 def metricas(r):
     y, p, pr = r["reais"], r["pred"], r["probs"]
+    pr = pr / pr.sum(1, keepdims=True)
     por_fold = []
     for d in r["folds"]:
         yf, pf = np.array(d["reais"]), np.array(d["probs"]).argmax(1)
@@ -347,7 +349,7 @@ def grafico_curvas(nome, folds, destino):
     a1.set_title(f"{nome}: acurácia por época"); a1.set_xlabel("Época"); a1.set_ylabel("Acurácia"); a1.set_ylim(0.3, 1.01)
     a2.set_title(f"{nome}: perda por época"); a2.set_xlabel("Época"); a2.set_ylabel("Perda (entropia cruzada)")
     for a in (a1, a2):
-        a.grid(alpha=0.3)
+        a.grid(alpha=0.3); a.xaxis.set_major_locator(MaxNLocator(integer=True))
     a1.legend(fontsize=8, title="Contínua: validação · tracejada: treino · pontilhada: melhor época", title_fontsize=7)
     fig.tight_layout(); fig.savefig(destino, dpi=150); plt.close(fig)
 
