@@ -178,35 +178,45 @@ def main():
         conflito = len({x for x in classes if x in CLASSES_TREINO or x.startswith("fora")}) > 1
         titulo = ""
         h = pagina_html("atlascyto_detail.php", idx_det, f"Id={i}&cat={prim}&flag=0&lang=1", a.pausa)
+        fotos = []
         if h:
             titulo = titulo_h1(h)
-        destino = out / "dataset" / cl / f"{i}.jpg"
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        if not destino.exists() or destino.stat().st_size < 1000:
-            destino.write_bytes(pedir(f"{BASE}/pic/{i}.jpg", binario=True))
-            time.sleep(a.pausa)
-        dados = destino.read_bytes()
-        sha = hashlib.sha256(dados).hexdigest()
-        try:
-            from PIL import Image
-            with Image.open(destino) as imo:
-                w, hh = imo.size
-        except Exception:
-            w = hh = ""
+            fotos = list(dict.fromkeys(re.findall(r'href="pic/([A-Za-z0-9_]+)\.jpg"', h)))
+        if not fotos:
+            fotos = [i]          # imagens com painéis (A, B...) aparecem como <Id>a.jpg, <Id>b.jpg
         obj = re.search(r"obj\.?\s*([0-9]+)\s*x", im["desc_en"])
         txt = im["desc_en"].lower()
         preparo = "meio líquido" if re.search(r"liquid|thinprep|surepath", txt) else ("convencional" if "conventional" in txt else "")
-        hashes.setdefault(sha, []).append(i)
-        linhas.append({
-            "id_imagem": i, "arquivo": str(destino.relative_to(out)), "classe_treino": cl.split("/")[-1] if cl in CLASSES_TREINO else cl.split("/")[-1],
-            "usar_no_treino_4_classes": "sim" if cl in CLASSES_TREINO else "não",
-            "pasta": cl, "categoria_codigo": prim, "categoria_nome": nomes.get(prim, ("", ""))[0], "secao_atlas": nomes.get(prim, ("", ""))[1],
-            "todas_categorias": ";".join(cats_i), "titulo_diagnostico_en": titulo, "descricao_en": im["desc_en"], "descricao_pt": im["desc_pt"],
-            "objetiva": f"{obj.group(1)}x" if obj else "", "preparo_mencionado": preparo, "largura_px": w, "altura_px": hh,
-            "tamanho_kb": round(len(dados) / 1024, 1), "sha256": sha, "conflito_de_classe": "sim" if conflito else "",
-            "nota_mapeamento": nota, "url_imagem": f"{BASE}/pic/{i}.jpg", "url_detalhe": f"{BASE}/atlascyto_detail.php?Id={i}&cat={prim}&flag=0&lang=1"})
+        for foto in fotos:
+            destino = out / "dataset" / cl / f"{foto}.jpg"
+            destino.parent.mkdir(parents=True, exist_ok=True)
+            if not (destino.exists() and destino.read_bytes()[:2] == b"\xff\xd8"):
+                dados = pedir(f"{BASE}/pic/{foto}.jpg", binario=True)
+                if dados[:2] != b"\xff\xd8":      # o servidor devolve a página HTML (200) quando o arquivo não existe
+                    print(f"  AVISO: {foto}.jpg não é JPEG; ignorado")
+                    continue
+                destino.write_bytes(dados)
+                time.sleep(a.pausa)
+            dados = destino.read_bytes()
+            sha = hashlib.sha256(dados).hexdigest()
+            try:
+                from PIL import Image
+                with Image.open(destino) as imo:
+                    w, hh = imo.size
+            except Exception:
+                w = hh = ""
+            hashes.setdefault(sha, []).append(foto)
+            linhas.append({
+                "id_imagem": foto, "id_registro": i, "painel": foto[len(i):] if foto.startswith(i) and foto != i else "",
+                "arquivo": str(destino.relative_to(out)), "classe_treino": cl.split("/")[-1],
+                "usar_no_treino_4_classes": "sim" if cl in CLASSES_TREINO else "não",
+                "pasta": cl, "categoria_codigo": prim, "categoria_nome": nomes.get(prim, ("", ""))[0], "secao_atlas": nomes.get(prim, ("", ""))[1],
+                "todas_categorias": ";".join(cats_i), "titulo_diagnostico_en": titulo, "descricao_en": im["desc_en"], "descricao_pt": im["desc_pt"],
+                "objetiva": f"{obj.group(1)}x" if obj else "", "preparo_mencionado": preparo, "largura_px": w, "altura_px": hh,
+                "tamanho_kb": round(len(dados) / 1024, 1), "sha256": sha, "conflito_de_classe": "sim" if conflito else "",
+                "nota_mapeamento": nota, "url_imagem": f"{BASE}/pic/{foto}.jpg", "url_detalhe": f"{BASE}/atlascyto_detail.php?Id={i}&cat={prim}&flag=0&lang=1"})
         if n % 50 == 0 or n == len(ids):
-            print(f"  {n}/{len(ids)} imagens")
+            print(f"  {n}/{len(ids)} registros, {len(linhas)} imagens")
     for r in linhas:
         r["duplicada_de"] = ";".join(x for x in hashes[r["sha256"]] if x != r["id_imagem"])
 
