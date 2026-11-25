@@ -33,6 +33,7 @@ import argparse
 import csv
 import hashlib
 import html
+import http.client
 import json
 import re
 import shutil
@@ -79,7 +80,7 @@ def pedir(url, binario=False, tentativas=4):
             with urllib.request.urlopen(req, timeout=40) as r:
                 d = r.read()
             return d if binario else d.decode("utf-8", "replace")
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException, OSError) as e:
             if t == tentativas - 1:
                 raise
             time.sleep(2 ** t)
