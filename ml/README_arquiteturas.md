@@ -41,3 +41,15 @@ python anotar_celulas.py --imagens pasta --arquitetura convnext_large --pesos re
 Localiza núcleos (deconvolução hematoxilina, Otsu, componentes conectados) ou usa grade (`--modo grade`), classifica cada recorte e desenha caixa colorida com "CLASSE xx%" e faixa de título com a classe da lâmina (a mais grave detectada), confiança e número de detecções. Gera `deteccoes.csv` e `resumo.csv`.
 
 **Limitação:** as redes foram treinadas com campos inteiros, não com células individuais. A classe por célula é extrapolação, sem validação contra rótulos celulares; a localização por núcleos é heurística e pode juntar ou perder células. Os testes feitos foram com dados sintéticos; nenhum resultado com as imagens reais foi obtido nesta sessão.
+
+## 5. Rotulagem de recortes por especialista
+
+```bash
+python treinar_recortes.py extrair --dados <pasta> --saida recortes_out
+python treinar_recortes.py planilha --dados <pasta> --saida recortes_out --por-classe 100
+# entregar ao especialista APENAS planilha_rotulagem.xlsx (a chave_rotulagem.csv fica com você)
+python treinar_recortes.py planilha-para-csv --saida recortes_out --xlsx planilha_preenchida.xlsx
+python treinar_recortes.py treinar --saida recortes_out --rotulos recortes_out/rotulos.csv --so-rotulados
+```
+
+A planilha é cega (não mostra a classe da imagem de origem), tem ordem aleatória, no máximo 3 recortes por imagem, recorte e contexto lado a lado (caixa vermelha), listas suspensas de rótulo e de certeza. Para medir a confiabilidade do rótulo, duas pessoas devem preencher cópias separadas; o kappa entre elas é calculado fora do script.
